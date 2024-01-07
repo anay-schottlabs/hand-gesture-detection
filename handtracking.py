@@ -23,14 +23,13 @@ class handDetector():
         chosenHand = self.getHandLandmarksFromImage(image)
         if chosenHand:
             chosenHand = chosenHand[handIndex]
-            for index, landmark in enumerate(chosenHand.landmark):
+            for _, landmark in enumerate(chosenHand.landmark):
                 width = image.shape[1]
                 height = image.shape[0]
                 xPos = int(landmark.x * width)
                 yPos = int(landmark.y * height)
                 landmarks.append({
-                    "index": index,
                     "x": xPos,
-                    "y": yPos
+                    "y": yPos,
                 })
         return landmarks
