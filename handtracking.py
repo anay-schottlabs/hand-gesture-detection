@@ -2,10 +2,10 @@ import cv2
 import mediapipe
 
 class handDetector():
-    def __init__(self):
+    def __init__(self, maxHands, detectionConfidence, trackingConfidence):
         self.mediapipeHands = mediapipe.solutions.hands
         self.mediapipeDraw = mediapipe.solutions.drawing_utils
-        self.hands = self.mediapipeHands.Hands()
+        self.hands = self.mediapipeHands.Hands(max_num_hands = maxHands, min_detection_confidence=detectionConfidence, min_tracking_confidence=trackingConfidence)
 
     def getHandLandmarksFromImage(self, image):
         imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -28,16 +28,9 @@ class handDetector():
                 height = image.shape[0]
                 xPos = int(landmark.x * width)
                 yPos = int(landmark.y * height)
-                landmarks.append((index, xPos, yPos))
+                landmarks.append({
+                    "index": index,
+                    "x": xPos,
+                    "y": yPos
+                })
         return landmarks
-
-
-# Set up camera
-capture = cv2.VideoCapture(0)
-
-while True:
-    handFinder = handDetector()
-    image = capture.read()[1]
-    print(handFinder.findHandLandmarkPositions(image, 0))
-    cv2.imshow("Image", handFinder.detectHands(image))
-    cv2.waitKey(1)
