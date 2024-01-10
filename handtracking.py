@@ -8,24 +8,27 @@ class HandDetector:
         self.mediapipeDraw = mediapipe.solutions.drawing_utils
         self.hands = self.mediapipeHands.Hands(max_num_hands = maxHands, min_detection_confidence=detectionConfidence, min_tracking_confidence=trackingConfidence)
 
-    # Get the landmarks of hands in an image
+    # Get the data for the landmarks of hands in an image
     def getHandLandmarksFromImage(self, image):
         imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return self.hands.process(imageRGB).multi_hand_landmarks                                                                                                                                                      
 
-    def detectHands(self, image):
+    # If there are hands in an image, draw the landmarks on the image
+    def drawHandsOnImage(self, image):
         handLandmarks = self.getHandLandmarksFromImage(image)
         if handLandmarks:
             for handLandmark in handLandmarks:
                 self.mediapipeDraw.draw_landmarks(image, handLandmark, self.mediapipeHands.HAND_CONNECTIONS)
         return image
-    
+
+    # Check how many hands are in an image
     def getHandCountInImage(self, image):
         hands = self.getHandLandmarksFromImage(image)
         if (hands):
             return len(hands)
         return 0
 
+    # Get the positions of landmarks in an image
     def getHandLandmarkPositions(self, image, handIndex):
         landmarks = []
         chosenHand = self.getHandLandmarksFromImage(image)

@@ -2,10 +2,12 @@ import handtracking
 import json
 import fastdtw
 
+# A class to detect hand gestures
 class GestureDetector:
     def __init__(self, maxHands, detectionConfidence, trackingConfidence):
         self.handDetector = handtracking.HandDetector(maxHands, detectionConfidence, trackingConfidence)
     
+    # Check if any of the hands on the screen have their palms open
     def detectOpenPalm(self, image):
         thumbOpen = False
         indexOpen = False
@@ -28,6 +30,7 @@ class GestureDetector:
                 return True
         return False
 
+    # Classify the gesture given based on labeled data from existing gestures
     def mostSimilarGestureName(self, newGesture, existingGesturesJSON):
         existingGestures = json.loads(existingGesturesJSON)
         gestureCosts = []
