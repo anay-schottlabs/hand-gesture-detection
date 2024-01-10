@@ -36,7 +36,7 @@ class GestureDetector:
                         return ({"x": xModifierToCenter, "y": yModifierToCenter}, True)
                 except:
                     break
-            return (False, None)
+            return (None, False)
 
     def mostSimilarGestureName(self, newGesture, existingGesturesJSON, xModifierToCenter, yModifierToCenter):
         existingGestures = json.loads(existingGesturesJSON)
@@ -52,7 +52,7 @@ class GestureDetector:
             for hand in centeredExistingGesture:
                 for handLandmarks in hand:
                     for handLandmark in handLandmarks:
-                        handLandmark[1] += xModifierToCenter
-                        handLandmark[2] += yModifierToCenter
+                        handLandmark[0] += xModifierToCenter
+                        handLandmark[1] += yModifierToCenter
             gestureCosts.append(fastdtw.fastdtw(newGesture, existingGesture))
         return existingGestures[gestureCosts.index(min(gestureCosts))]["name"]
