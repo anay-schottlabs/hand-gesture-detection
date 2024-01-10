@@ -6,7 +6,7 @@ class GestureDetector:
     def __init__(self, maxHands, detectionConfidence, trackingConfidence):
         self.handDetector = handtracking.HandDetector(maxHands, detectionConfidence, trackingConfidence)
     
-    def detectOpenPalm(self, image, handLandmarkToCenter):
+    def detectOpenPalm(self, image):
         thumbOpen = False
         indexOpen = False
         middleOpen = False
@@ -25,29 +25,12 @@ class GestureDetector:
             if (hand[18]["y"] > hand[19]["y"] > hand[20]["y"]):
                 pinkyOpen = True
             if (thumbOpen and indexOpen and middleOpen and ringOpen and pinkyOpen):
-                height, width = image.shape
-                centerX = width / 2
-                centerY = height / 2
-                xModifierToCenter = centerX - hand[handLandmarkToCenter]["x"]
-                yModifierToCenter = centerY - hand[handLandmarkToCenter]["y"]
-                return ({"x": xModifierToCenter, "y": yModifierToCenter}, True)
-        return (None, False)
+                return True
+        return False
 
-    def mostSimilarGestureName(self, newGesture, existingGesturesJSON, xModifierToCenter, yModifierToCenter):
+    def mostSimilarGestureName(self, newGesture, existingGesturesJSON):
         existingGestures = json.loads(existingGesturesJSON)
         gestureCosts = []
         for existingGesture in existingGestures:
-            centeredNewGesture = newGesture.copy()
-            centeredExistingGesture = existingGesture.copy()
-            for hand in centeredNewGesture:
-                for handFrame in hand:
-                    for handLandmark in handFrame:
-                        handLandmark[0] += xModifierToCenter
-                        handLandmark[1] += yModifierToCenter
-            for hand in centeredExistingGesture:
-                for handFrame in hand:
-                    for handLandmark in handFrame:
-                        handLandmark[0] += xModifierToCenter
-                        handLandmark[1] += yModifierToCenter
-            gestureCosts.append(fastdtw.fastdtw(newGesture, existingGesture))
+            gestureCosts.append(fastdtw.fastdtw(newGesture, existingGesture["gesture"])[0])
         return existingGestures[gestureCosts.index(min(gestureCosts))]["name"]
