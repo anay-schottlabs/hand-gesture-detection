@@ -30,7 +30,7 @@ class HandDetector:
 
     # Center a specific hand in an image and return the new landmark positions
     def centerHandPositions(self, image, handIndex, landmarkToCenter):
-        chosenHandPositions = self.getHandLandmarksFromImage(image, handIndex)
+        chosenHandPositions = self.getHandLandmarkPositions(image, handIndex)
         height, width = image.shape
         centerX = width / 2
         centerY = height / 2
