@@ -16,6 +16,7 @@ class GestureDetector:
         pinkyOpen = False
         for i in range(self.handDetector.getHandCountInImage(image)):
             hand = self.handDetector.getHandLandmarkPositions(image, i)
+            # Check for relative hand landmark positions
             if (hand[2]["y"] > hand[3]["y"] > hand[4]["y"]):
                 thumbOpen = True
             if (hand[6]["y"] > hand[7]["y"] > hand[8]["y"]):
@@ -34,6 +35,8 @@ class GestureDetector:
     def mostSimilarGestureName(self, newGesture, existingGesturesJSON):
         existingGestures = json.loads(existingGesturesJSON)
         gestureCosts = []
+        # Use dynamic time warping to determine the cost to align the gesture to each gesture
         for existingGesture in existingGestures:
             gestureCosts.append(fastdtw.fastdtw(newGesture, existingGesture["gesture"])[0])
+        # Return the gesture name that has the least aligning cost
         return existingGestures[gestureCosts.index(min(gestureCosts))]["name"]

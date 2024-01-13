@@ -10,6 +10,7 @@ class HandDetector:
 
     # Get the data for the landmarks of hands in an image
     def getHandLandmarksFromImage(self, image):
+        # Convert the image to RGB format so that the hands can be processed
         imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return self.hands.process(imageRGB).multi_hand_landmarks                                                                                                                                                      
 
@@ -18,6 +19,7 @@ class HandDetector:
         handLandmarks = self.getHandLandmarksFromImage(image)
         if handLandmarks:
             for handLandmark in handLandmarks:
+                # Draw the identified hand on the image
                 self.mediapipeDraw.draw_landmarks(image, handLandmark, self.mediapipeHands.HAND_CONNECTIONS)
         return image
 
@@ -31,15 +33,19 @@ class HandDetector:
     # Center a specific hand in an image and return the new landmark positions
     def centerHandPositions(self, image, handIndex, landmarkToCenter):
         chosenHandPositions = self.getHandLandmarkPositions(image, handIndex)
-        height, width = image.shape
-        centerX = width / 2
-        centerY = height / 2
-        xModifierToCenter = centerX - chosenHandPositions[landmarkToCenter].x
-        yModifierToCenter = centerY - chosenHandPositions[landmarkToCenter].y
         if chosenHandPositions:
+            # Get the height and width
+            height, width, _ = image.shape
+            # Get the center positions
+            centerX = width / 2
+            centerY = height / 2
+            # Determine the change to reach the center positions
+            xModifierToCenter = centerX - chosenHandPositions[landmarkToCenter]["x"]
+            yModifierToCenter = centerY - chosenHandPositions[landmarkToCenter]["y"]
+            # Apply the change to each hand landmark position
             for landmark in chosenHandPositions:
-                landmark.x += xModifierToCenter
-                landmark.y += yModifierToCenter
+                landmark["x"] += xModifierToCenter
+                landmark["y"] += yModifierToCenter
         return chosenHandPositions
 
     # Get the positions of landmarks in an image
@@ -49,9 +55,12 @@ class HandDetector:
         if chosenHand:
             chosenHand = chosenHand[handIndex]
             for index, landmark in enumerate(chosenHand.landmark):
-                height, width = image.shape;
+                # Get the height and width of the image
+                height, width, _ = image.shape;
+                # Convert the landmark positions to pixel values
                 xPos = int(landmark.x * width)
                 yPos = int(landmark.y * height)
+                # Add the pixel landmark positions to an array and add the index of the landmark
                 landmarks.append({
                     "index": index,
                     "x": xPos,
