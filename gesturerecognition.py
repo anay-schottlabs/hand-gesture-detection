@@ -1,6 +1,6 @@
 import handtracking
-import json
 import fastdtw
+import numpy
 
 # A class to detect hand gestures
 class GestureDetector:
@@ -32,11 +32,18 @@ class GestureDetector:
         return False
 
     # Classify the gesture given based on labeled data from existing gestures
-    def mostSimilarGestureName(self, newGesture, existingGesturesJSON):
-        existingGestures = json.loads(existingGesturesJSON)
+    def mostSimilarGestureName(self, newGesture, existingGestures):
         gestureCosts = []
-        # Use dynamic time warping to determine the cost to align the gesture to each gesture
         for existingGesture in existingGestures:
-            gestureCosts.append(fastdtw.fastdtw(newGesture, existingGesture["gesture"])[0])
+            newGesturePoints = []
+            existingGesturePoints = []
+             # Convert the new gesture into a list of points
+            for point in newGesture:
+                newGesturePoints.append([point["x"], point["y"]])
+            # Convert the existing gesture into a list of points
+            for point in existingGesture["gesture"]:
+                existingGesturePoints.append([point["x"], point["y"]])
+            # Use dynamic time warping to determine the cost to align the new gesture to each existing gesture
+            gestureCosts.append(fastdtw.fastdtw(newGesturePoints, existingGesturePoints)[0])
         # Return the gesture name that has the least aligning cost
         return existingGestures[gestureCosts.index(min(gestureCosts))]["name"]
