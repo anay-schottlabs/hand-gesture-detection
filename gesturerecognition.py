@@ -35,16 +35,21 @@ class GestureDetector:
     def getGestureCosts(self, newGesture, existingGestures):
         gestureCosts = []
         for existingGesture in existingGestures:
-            newGesturePoints = []
-            existingGesturePoints = []
-             # Convert the new gesture into a list of points
-            for point in newGesture:
-                newGesturePoints.append([point["x"], point["y"]])
-            # Convert the existing gesture into a list of points
-            for point in existingGesture["gesture"]:
-                existingGesturePoints.append([point["x"], point["y"]])
+            # Convert the gestures into points
+            newGesturePoints = self.convertGestureToPoints(newGesture)
+            existingGesturePoints = self.convertGestureToPoints(existingGesture)
             # Use dynamic time warping to determine the cost to align the new gesture to each existing gesture
             cost = fastdtw.fastdtw(newGesturePoints, existingGesturePoints)[0]
             gestureCosts.append({"name": existingGesture["name"], "cost": cost})
         # Return all of the gesture costs
         return gestureCosts
+
+    # Convert each hand landmark to a list of coordinates rather than a dictionary
+    def convertGestureToPoints(gesture):
+        # Copy the original gesture
+        gesturePoints = gesture.copy()
+        for handMovement in gesturePoints:
+            for hand in handMovement:
+                for point in hand:
+                    # Convert each dictionary to a list of the x and y coordinates
+                    point = [point["x"], point["y"]]
