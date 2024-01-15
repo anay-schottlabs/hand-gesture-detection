@@ -10,7 +10,7 @@ TRAINING_DATA_FILE_PATH = "trainingdata.json"
 CAMERA_WIDTH = 1280
 CAMERA_HEIGHT = 720
 LOOP_DELAY = 2
-MIN_MATCH_THRESHOLD = 800
+MIN_MATCH_THRESHOLD = 500
 GESTURE_PREP_DELAY = 2
 capture = cv2.VideoCapture(0)
 handDetector = handtracking.HandDetector(1, 0.5, 0.5)
@@ -31,10 +31,11 @@ def getNameOfGesture(image):
             for gestureCost in gestureCosts:
                 if gestureCost["cost"] < minGestureCost["cost"]:
                     minGestureCost = gestureCost
-            if minGestureCost["cost"] <= MIN_MATCH_THRESHOLD:
+            if minGestureCost["cost"] <= MIN_MATCH_THRESHOLD and minGestureCost["name"] != "none":
                 print(f"Your gesture was identified as '{minGestureCost['name']}'")
             else:
-                print("Your gesture did not match.")
+                print("Your gesture did not match any other gesture.")
+                minGestureCost["name"] = "none"
             gestureName = input("Enter to register the gesture, type 'NONE' to cancel, or type a different name: ")
             if gestureName != "NONE":
                 if gestureName == "":
