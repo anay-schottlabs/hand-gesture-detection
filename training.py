@@ -52,7 +52,7 @@ def addTrainingData():
             recordedImage = image.copy()
         # Prompt the user for a name to label the hand gesture with
         imageName = input("Enter a name for the image: ")
-        addGestureToFile(imageName, handDetector.centerHandPositions(recordedImage, 0, 0), TRAINING_DATA_FILE_PATH)
+        addGestureToFile(imageName, handDetector.getRelativeHandPositions(recordedImage, 0, 0), TRAINING_DATA_FILE_PATH)
         # Wait for the specified delay
         cv2.waitKey(LOOP_DELAY)
 

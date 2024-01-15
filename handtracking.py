@@ -47,6 +47,21 @@ class HandDetector:
                 landmark["x"] += xModifierToCenter
                 landmark["y"] += yModifierToCenter
         return chosenHandPositions
+    
+    # Get the relative positions of the landmarks of a hand in a given image
+    def getRelativeHandPositions(self, image, handIndex, landmarkToCenter):
+        chosenHandPositions = self.getHandLandmarkPositions(image, handIndex)
+        if chosenHandPositions:
+            # Determine the chosen landmark
+            chosenLandmark = chosenHandPositions[landmarkToCenter]
+            # Find the change to convert the positions to relative positions
+            xToRelative = chosenLandmark["x"]
+            yToRelative = chosenLandmark["y"]
+            # Apply the change to each hand landmark position
+            for landmark in chosenHandPositions:
+                landmark["x"] -= xToRelative
+                landmark["y"] -= yToRelative
+        return chosenHandPositions
 
     # Get the positions of landmarks in an image
     def getHandLandmarkPositions(self, image, handIndex):

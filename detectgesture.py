@@ -23,7 +23,7 @@ def getNameOfGesture(image):
     print(f"You have {GESTURE_PREP_DELAY} seconds to prepare your gesture.")
     time.sleep(GESTURE_PREP_DELAY)
     print("Your gesture was captured.")
-    capturedGesture = handDetector.centerHandPositions(image, 0, 0)
+    capturedGesture = handDetector.getRelativeHandPositions(image, 0, 0)
     with open(TRAINING_DATA_FILE_PATH, "r") as trainingDataFile:
         if len(capturedGesture) > 0:
             gestureCosts = gestureDetector.getGestureCosts(capturedGesture, json.load(trainingDataFile))
