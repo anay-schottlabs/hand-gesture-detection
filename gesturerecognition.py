@@ -1,5 +1,6 @@
 import handtracking
 import fastdtw
+import numpy as np
 
 # A class to detect hand gestures
 class GestureDetector:
@@ -32,9 +33,10 @@ class GestureDetector:
         return False
 
     # Get the cost to align each existing gesture to a new gesture
-    def getGestureCosts(self, newGesture, existingGestures):
+    def getGestureCosts(self, newGesture, existingGestures, newGestureIdentifier):
         gestureCosts = []
-        for existingGesture in existingGestures:
+        mostSimilarGestures = self.getSimilarGestures(existingGestures, newGestureIdentifier)
+        for existingGesture in mostSimilarGestures:
             # Convert the gestures into points
             newGesturePoints = self.convertGestureToPoints(newGesture)
             existingGesturePoints = self.convertGestureToPoints(existingGesture)
@@ -44,8 +46,34 @@ class GestureDetector:
         # Return all of the gesture costs
         return gestureCosts
 
+    # Use a binary search to get similar gestures to a new gesture using their identifiers
+    def getSimilarGestures(self, gestures, identifier):
+        # Set the low and high variables
+        low = 0
+        high = len(gestures) - 1
+        while low <= high:
+            # Calculate the middle of the gestures
+            middle = (high + low) // 2
+            # If we are on the last gesture and can't find anything, exit the loop
+            if middle == len(gestures) - 1:
+                break
+            # Return the gestures if we found the two closest ones
+            elif gestures[middle] < identifier and gestures[middle + 1] > identifier:
+                return (gestures[middle], gestures[middle + 1])
+            # If we found the same gesture, return it
+            elif gestures[middle] == identifier:
+                return (gestures[middle],)
+            # If the gesture's identifier is less than the new identifier, change the low to the middle
+            elif gestures[middle] < identifier:
+                low = middle + 1
+            # If the gesture's identifier is higher than the new identifier, change the high to the middle
+            elif gestures[middle] > identifier:
+                high = middle - 1
+        # If we couldn't find anything, return an empty tuple
+        return ()
+
     # Convert each hand landmark to a list of coordinates rather than a dictionary
-    def convertGestureToPoints(gesture):
+    def convertGestureToPoints(self, gesture):
         # Copy the original gesture
         gesturePoints = gesture.copy()
         for handMovement in gesturePoints:
@@ -53,3 +81,7 @@ class GestureDetector:
                 for point in hand:
                     # Convert each dictionary to a list of the x and y coordinates
                     point = [point["x"], point["y"]]
+
+    # Get the distance between the given gesture and a standard comparison gesture
+    def getGestureIdentifier(self, gesture, comparisonGesture):
+        return np.linalg.norm(gesture - comparisonGesture)
