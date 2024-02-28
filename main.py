@@ -89,7 +89,7 @@ class GestureRecognizer:
                 json.dump(training_data, training_data_file, indent=4)
     
     # Take an image and identify which gesture it is
-    def recognize_gesture_in_image(self, image, training_file_name, min_match_threshold):
+    def recognize_gesture_in_image(self, image, training_file_name):
         # Extract hand landmarks from the provided image
         hand_landmarks = self.get_hand_landmarks_from_image(image)
         # Check if any hands were actually in the image
@@ -117,9 +117,7 @@ class GestureRecognizer:
                         # If the new cost is less than the least cost, it becomes the least cost
                         if gesture_cost["cost"] < most_similar_gesture["cost"]:
                             most_similar_gesture = gesture_cost
-                    # If the most similar gesture meets the minimum match threshold provided, return its name
-                    if most_similar_gesture["cost"] <= min_match_threshold:
-                        return most_similar_gesture["name"], "A match was found."
+                    return most_similar_gesture["name"], "A match was found."
                 except:
                     return "None", "No training data was provided."
         # If there was either no hand in the image or the most similar gesture didn't meet the threshold, return nothing
@@ -135,8 +133,6 @@ CAMERA_HEIGHT = 720
 # The minimum confidence required to detect and track hands
 DETECTION_CONFIDENCE = 0.7
 TRACKING_CONFIDENCE = 0.7
-# The minimum threshold for a match for a gesture
-MIN_MATCH_THRESHOLD = 1000000
 
 # An event for when an image is captured
 image_captured_event = threading.Event()
@@ -190,7 +186,7 @@ def handle_user_input():
             gesture_name = input("Enter a name for the gesture to register it, or press enter to identify it: ")
             # If no name was provided, identify the gesture
             if gesture_name == "":
-                match, message = gesture_recognizer.recognize_gesture_in_image(captured_image, TRAINING_DATA_FILE_PATH, MIN_MATCH_THRESHOLD)
+                match, message = gesture_recognizer.recognize_gesture_in_image(captured_image, TRAINING_DATA_FILE_PATH)
                 print(f"Match: {match}")
                 print(f"Message: {message}")
             # If a name was provided, save the gesture to the training file
