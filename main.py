@@ -138,9 +138,11 @@ TRACKING_CONFIDENCE = 0.7
 # The minimum threshold for a match for a gesture
 MIN_MATCH_THRESHOLD = 1000000
 
+# An event for when an image is captured
 image_captured_event = threading.Event()
+# An event for when the program should exit
 exit_program_event = threading.Event()
-
+# A lock to make sure the image is set safely
 set_image_lock = threading.Lock()
 
 # Create a new video capture
@@ -148,41 +150,62 @@ capture = cv2.VideoCapture(0)
 # Create a gesture recognizer with the detection and tracking confidence
 gesture_recognizer = GestureRecognizer(DETECTION_CONFIDENCE, TRACKING_CONFIDENCE)
 
+# Show the camera feed and capture images
 def show_camera_feed():
     while True:
+        # Use the lock for safety
         with set_image_lock:
+            # Make sure that other methods can access the captured image
             global captured_image
+            # Capture the image from the camera feed
             _, captured_image = capture.read()
+            # Resize the image
             captured_image = cv2.resize(captured_image, (CAMERA_WIDTH, CAMERA_HEIGHT))
+            # Draw hands on the image
             captured_image = gesture_recognizer.draw_hands_on_image(captured_image)
+            # Display the image in a window
             cv2.imshow("Hand Gesture Recognition", captured_image)
+            # Set the event
             image_captured_event.set()
+        # Wait for the delay
         key = cv2.waitKey(LOOP_DELAY)
+        # Exit the program if the escape key was pressed
         if key == 27:
             exit_program_event.set()
             break
+    # Close the window
     cv2.destroyAllWindows()
 
+# Take user input to save gestures as training data and recognize gestures
 def handle_user_input():
+    # Run this until the program needs to exit
     while not exit_program_event.is_set():
+        # Wait for the image to be set
         image_captured_event.wait()
         image_captured_event.clear()
+        # Wait for the user to press enter to record the gesture
         input("Press enter to record a gesture: ")
         with set_image_lock:
+            # Ask for a gesture name
             gesture_name = input("Enter a name for the gesture to register it, or press enter to identify it: ")
+            # If no name was provided, identify the gesture
             if gesture_name == "":
                 match, message = gesture_recognizer.recognize_gesture_in_image(captured_image, TRAINING_DATA_FILE_PATH, MIN_MATCH_THRESHOLD)
                 print(f"Match: {match}")
                 print(f"Message: {message}")
+            # If a name was provided, save the gesture to the training file
             else:
                 gesture_recognizer.save_image_as_training_data(captured_image, gesture_name, TRAINING_DATA_FILE_PATH)
                 print("The data was successfully registered.")
 
+# Set threads
 show_camera_feed_thread = threading.Thread(target=show_camera_feed)
 handle_user_input_thread = threading.Thread(target=handle_user_input)
 
+# Start the threads
 show_camera_feed_thread.start()
 handle_user_input_thread.start()
 
+# Join the threads to the main thread
 show_camera_feed_thread.join()
 handle_user_input_thread.join()
